@@ -1,0 +1,13 @@
+# Runtime data
+var/*.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Local logs
+debug.log
+*.log

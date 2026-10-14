@@ -1,6 +1,7 @@
 """Event use cases: validate requests and enforce review and cancellation rules."""
 
 import db
+import notifications
 import rules
 
 
@@ -52,7 +53,14 @@ def approve(event_id: int) -> tuple[bool, list[str]]:
         return False, reasons
 
     db.update_status(event_id, "CONFIRMED")
+    _notify_decision(event, "CONFIRMED")
     return True, []
+
+
+def _notify_decision(event: dict, status: str, reason: str | None = None) -> None:
+    """Tell the requester about a decision on their request (BONUS-1)."""
+    message = f"'{event['title']}' at {event['venue_name']} is now {status}"
+    notifications.notify(event["id"], f"{message}: {reason}" if reason else message)
 
 
 def _close_event(event_id: int, action: str, reason: str) -> tuple[bool, list[str]]:
@@ -65,7 +73,9 @@ def _close_event(event_id: int, action: str, reason: str) -> tuple[bool, list[st
     if reasons:
         return False, reasons
 
-    db.update_status(event_id, rules.next_status(event["status"], action), reason.strip())
+    status = rules.next_status(event["status"], action)
+    db.update_status(event_id, status, reason.strip())
+    _notify_decision(event, status, reason.strip())
     return True, []
 
 

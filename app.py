@@ -3,6 +3,7 @@
 import streamlit as st
 
 import db
+import notifications
 import ui_request
 
 try:
@@ -21,7 +22,27 @@ def render_sidebar() -> str:
     if st.sidebar.button("Reset demo data"):
         db.init_db(reset=True)
         st.rerun()
+    render_notifications()
     return role
+
+
+def render_notifications() -> None:
+    """Show decision notifications newest first, with an unread count and mark-all-read (BONUS-1)."""
+    items = notifications.list_notifications()
+    unread = sum(not n["is_read"] for n in items)
+    st.sidebar.divider()
+    st.sidebar.subheader(f"Notifications ({unread} unread)")
+    if not items:
+        st.sidebar.caption("No notifications yet.")
+        return
+    if unread and st.sidebar.button("Mark all read"):
+        notifications.mark_all_read()
+        st.rerun()
+    for n in items:
+        if n["is_read"]:
+            st.sidebar.caption(n["message"])
+        else:
+            st.sidebar.markdown(f"**{n['message']}**")
 
 
 def render_reviewer() -> None:

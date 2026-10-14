@@ -98,7 +98,12 @@ Layering: UI → `workflow.py` → `rules.py` + `db.py`. Only `db.py` and `notif
 - `list_notifications()`: returns all notifications, newest first (each has `is_read`)
 - `mark_all_read()`: clears the unread count
 
-Wiring it into the app needs one `notify()` call after each successful approve, reject and cancel in `workflow.py` (P3), and a sidebar list with an unread count and a "Mark all read" button in `app.py` (P4).
+How it's wired in:
+
+- `workflow.py`: each successful approve, reject or cancel records one notification, for example `'Tech Talk' at Main Auditorium is now CONFIRMED` or `... is now CANCELLED: Speaker unavailable`. Refused actions don't create a notification.
+- `app.py`: the sidebar shows **Notifications (N unread)** for both roles, newest first, with unread items in bold, plus a **Mark all read** button while anything is unread.
+
+To demo it, approve a request in the Reviewer view and watch the unread count go up, then click **Mark all read**.
 
 ## Out of Scope (deferred)
 
